@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sedwt.workflow.mapper.CommentMapper">
+
+<!--	提交评审评论-->
+	<insert id="addComment">
+		INSERT INTO wf_appraisal_handle
+		(appraisal_id, user_id, question_locate, question_desc, handle_status, create_by, remark)
+		VALUES
+		(#{appraisalId}, #{userId}, #{questionLocate}, #{questionDesc}, 0, #{createBy}, #{remark})
+	</insert>
+	<update id="processComment">
+		UPDATE wf_appraisal_handle
+		<set>
+			<if test = " handleStatus != null and handleStatus != '' ">
+				handle_status = #{handleStatus},
+			</if>
+			<if test = " remark != null and remark != '' ">
+				remark = #{remark},
+			</if>
+		</set>
+		WHERE row_id = #{rowId}
+	</update>
+
+	<delete id="deleteAppraisalComments">
+		DELETE FROM wf_appraisal_handle
+		WHERE appraisal_id = #{appraisalId}
+	</delete>
+
+    <select id="selectCommentById" resultType="com.sedwt.workflow.domain.Comment">
+		SELECT * FROM wf_appraisal_handle
+		WHERE row_id = #{rowId}
+	</select>
+
+    <select id="selectCommentsByAppraisalId" resultType="com.sedwt.workflow.domain.Comment">
+		SELECT * FROM wf_appraisal_handle
+		WHERE appraisal_id = #{appraisalId}
+	</select>
+
+    <select id="countCommentsByUserId" resultType="java.lang.Integer">
+		SELECT count(user_id) FROM wf_appraisal_handle
+		WHERE user_id = #{userId} AND appraisal_id = #{appraisalId}
+	</select>
+
+
+</mapper>

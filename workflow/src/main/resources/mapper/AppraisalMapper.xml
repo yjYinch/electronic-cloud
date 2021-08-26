@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sedwt.workflow.mapper.AppraisalMapper">
+	
+	<resultMap type="com.sedwt.workflow.domain.Appraisal" id="AppraisalResult">
+		<id     property="appraisalId"       column="appraisal_id"      />
+		<result property="appraisalTitle"       column="appraisal_title"      />
+		<result property="beginTime"    column="begin_time"   />
+		<result property="endTime"     column="end_time"    />
+		<result property="roomNumber"        column="room_number"        />
+		<result property="appraisalDesc"  column="appraisal_desc"  />
+		<result property="attachmentUrls"          column="attachment_urls"          />
+		<result property="status"       column="status"       />
+		<result property="appraisalPersons"     column="appraisal_persons"     />
+		<result property="handledPersons"         column="handled_persons"         />
+		<result property="version"     column="version"    />
+		<result property="createBy"     column="create_by"    />
+		<result property="creatorName"     column="creatorName"    />
+		<result property="isOwner"     column="isOwner"    />
+		<result property="createTime"   column="create_time"  />
+		<result property="updateBy"     column="update_by"    />
+		<result property="updateTime"   column="update_time"  />
+		<result property="handleTime"   column="handle_time"  />
+		<result property="remark"       column="remark"       />
+		<collection property="participants"  ofType="com.sedwt.common.entity.sys.SysUser">
+			<result property="userId" column="p_id" />
+			<result property="userName" column="p_username" />
+			<result property="loginName" column="p_loginname" />
+			<result property="isOwner" column="p_isOwner" />
+			<result property="email" column="email"/>
+		</collection>
+		<collection property="comments" ofType="com.sedwt.workflow.domain.Comment">
+			<result property="rowId" column="row_id" />
+			<result property="appraisalId" column="c_appraisalId" />
+			<result property="questionDesc" column="question_desc" />
+			<result property="questionLocate" column="question_locate" />
+			<result property="handleStatus" column="handle_status" />
+			<result property="userId" column="c_userid" />
+			<result property="userName" column="c_username" />
+			<result property="remark" column="c_remark" />
+		</collection>
+		<collection property="attachments" ofType="com.sedwt.common.entity.file.AttachedFile">
+			<result property="fileId" column="f_id" />
+			<result property="fileName" column="f_name" />
+			<result property="fileUrl" column="f_url" />
+			<result property="fileFormat" column="f_format" />
+			<result property="readTimes" column="f_readTimes" />
+			<result property="downloadTimes" column="f_downloadTimes" />
+			<result property="fileSize" column="f_size" />
+			<result property="fileType" column="f_type" />
+			<result property="status" column="f_status" />
+			<result property="projectId" column="f_projectId" />
+		</collection>
+	</resultMap>
+
+	<select id="selectAppraisalList" resultType="com.sedwt.workflow.domain.Appraisal">
+		SELECT a.appraisal_id, a.appraisal_title, a.begin_time, a.end_time, a.room_number, a.appraisal_desc,
+			   a.attachment_urls, a.status, a.appraisal_persons, a.handled_persons, a.version,a.create_by, a.create_time,
+		       a.update_by, a.update_time, a.handle_time, a.remark, au.is_owner AS isOwner, u.user_name AS creatorName
+		FROM wf_appraisal a
+		LEFT JOIN wf_appraisal_user au ON a.appraisal_id = au.appraisal_id
+		LEFT JOIN sys_user u ON a.create_by = u.user_id
+		WHERE a.status != 0
+		<if test = " loginUserId != null and loginUserId != '' ">
+			AND au.user_id = #{loginUserId}
+		</if>
+		<if test = " appraisal.creatorName != null and appraisal.creatorName != '' ">
+			AND u.user_name LIKE concat(concat('%',#{appraisal.creatorName}),'%')
+		</if>
+		<if test = " appraisal.appraisalTitle != null and appraisal.appraisalTitle != '' ">
+			AND a.appraisal_title LIKE concat(concat('%',#{appraisal.appraisalTitle}),'%')
+		</if>
+		<choose>
+			<when test=" appraisal.status != null and appraisal.status != '' ">
+				AND a.status = #{appraisal.status}
+			</when>
+			<otherwise>
+				<if test="appraisal.preAppraisal == null or appraisal.preAppraisal == false">
+					AND a.status != 1
+				</if>
+				<if test="appraisal.duringAppraisal == null or appraisal.duringAppraisal == false">
+					AND a.status != 2
+				</if>
+				<if test="appraisal.completed == null or appraisal.completed == false">
+					AND a.status != 3
+				</if>
+				<if test="appraisal.canceled == null or appraisal.canceled == false">
+					AND a.status != 4
+				</if>
+			</otherwise>
+		</choose>
+		GROUP BY a.appraisal_id
+		ORDER BY a.create_time DESC
+	</select>
+
+	<select id="selectAppraisalById" resultMap="AppraisalResult">
+		SELECT a.appraisal_id, a.appraisal_title, a.begin_time, a.end_time, a.room_number, a.appraisal_desc,
+			   a.attachment_urls, a.status, a.appraisal_persons, a.handled_persons, a.version, a.create_by, a.create_time,
+			   a.update_by, a.update_time, a.handle_time, a.remark, au.is_owner AS isOwner, uc.user_name AS creatorName,
+			   up.user_id AS p_id, up.user_name AS p_username, up.login_name AS p_loginname, up.email ,
+		       au.is_owner AS p_isOwner,
+			   c.row_id, c.question_desc, c.question_locate, c.handle_status, c.appraisal_id AS c_appraisalId,
+		       c.user_id AS c_userId, c.remark AS c_remark,
+		       cu.user_id AS c_userid, cu.user_name AS c_username,
+			   c.row_id, c.question_desc, c.question_locate, c.handle_status, c.appraisal_id AS c_appraisalId,
+		       cu.user_id AS c_userid, cu.user_name AS c_username,
+			   fi.file_id AS f_id, fi.file_name AS f_name, fi.file_url AS f_url, fi.file_format AS f_format, fi.read_times AS f_readTimes,
+			   fi.download_times AS f_downloadTimes, fi.file_size AS f_size, fi.file_type AS f_type,
+			   fi.status AS f_status, fi.project_id AS f_projectId
+		FROM wf_appraisal a
+		LEFT JOIN wf_appraisal_user au ON a.appraisal_id = au.appraisal_id
+		LEFT JOIN sys_user uc ON a.create_by = uc.user_id
+		LEFT JOIN sys_user up ON au.user_id = up.user_id
+		LEFT JOIN wf_appraisal_handle c ON a.appraisal_id = c.appraisal_id
+		LEFT JOIN sys_user cu ON cu.user_id = c.user_id
+		LEFT JOIN file_info fi on a.appraisal_id = fi.project_id
+		WHERE a.appraisal_id = #{appraisalId}
+	</select>
+
+	<select id="selectEmailById" resultType="string">
+		SELECT su.email as emailAddress
+		FROM sys_user su
+		WHERE su.user_id = #{userId}
+	</select>
+	
+	<insert id="addAppraisalParticipant">
+		INSERT INTO wf_appraisal_user
+			(appraisal_id, user_id, is_owner)
+		VALUES
+			(#{appraisalId}, #{userId}, 1)
+	</insert>
+	<insert id="createAppraisalOwner">
+		INSERT INTO wf_appraisal_user
+			(appraisal_id, user_id, is_owner)
+		VALUES
+			(#{appraisalId}, #{ownerId}, 0)
+	</insert>
+	<delete id="deleteAppraisalById">
+		DELETE FROM wf_appraisal
+		WHERE appraisal_id = #{appraisalId}
+	</delete>
+	<delete id="deleteAppraisalParticipants">
+		DELETE FROM wf_appraisal_user
+		WHERE appraisal_id = #{appraisalId}
+	</delete>
+
+	<update id="cancelAppraisalById">
+		UPDATE wf_appraisal
+		SET status = 4, remark = #{remark}
+		WHERE appraisal_id = #{appraisalId}
+	</update>
+
+	<update id="updateAppraisal">
+		UPDATE wf_appraisal
+		<set>
+			<if test = " appraisalTitle != null and appraisalTitle != '' ">
+				appraisal_title = #{appraisalTitle},
+			</if>
+			<if test = " beginTime != null and beginTime != '' ">
+				begin_time = #{beginTime},
+			</if>
+			<if test = " endTime != null and endTime != '' ">
+				end_time = #{endTime},
+			</if>
+			<if test = " roomNumber != null and roomNumber != '' or roomNumber == 0">
+				room_number = #{roomNumber},
+			</if>
+			<if test = " status != null and status != '' or status == 0">
+				status = #{status},
+			</if>
+			<if test = " appraisalDesc != null and appraisalDesc != '' ">
+				appraisal_desc = #{appraisalDesc},
+			</if>
+			<if test = " attachmentUrls != null and attachmentUrls != '' ">
+				attachment_urls = #{attachmentUrls},
+			</if>
+			<if test = " appraisalPersons != null and appraisalPersons != '' or appraisalPersons == 0">
+				appraisal_persons = #{appraisalPersons},
+			</if>
+			<if test = " handledPersons != null and handledPersons != '' or handledPersons == 0">
+				handled_persons = #{handledPersons},
+			</if>
+			<if test = " handleTime != null and handleTime != ''">
+				handle_time = #{handleTime},
+			</if>
+			<if test = " updateBy != null and updateBy != '' ">
+				update_by = #{updateBy},
+			</if>
+			<if test = " remark != null and remark != '' ">
+				remark = #{remark},
+			</if>
+		</set>
+		WHERE appraisal_id = #{appraisalId}
+	</update>
+
+    <update id="increaseHandledPersons" parameterType="com.sedwt.workflow.domain.Appraisal">
+		UPDATE wf_appraisal
+		SET handled_persons = #{handledPersons} + 1
+		WHERE appraisal_id = #{appraisalId} AND version = #{version}
+	</update>
+
+    <insert id="addAppraisal" parameterType="com.sedwt.workflow.domain.Appraisal" useGeneratedKeys="true" keyProperty="appraisalId">
+		INSERT INTO wf_appraisal
+		(create_by, status)
+		VALUES
+		(#{createBy}, #{status})
+	</insert>
+
+	<select id="selectParticipantsByAppraisalId" resultType="com.sedwt.common.entity.sys.SysUser">
+		SELECT user_id, is_owner
+		FROM wf_appraisal_user
+		WHERE appraisal_id = #{appraisalId}
+	</select>
+    <select id="countAppraisalTitle" resultType="java.lang.Integer">
+		SELECT COUNT(appraisal_title)
+		FROM wf_appraisal
+		WHERE appraisal_title = #{appraisalTitle}
+	</select>
+
+</mapper>

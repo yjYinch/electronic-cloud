@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.sedwt</groupId>
+    <artifactId>electronic-all</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <inceptionYear>2021</inceptionYear>
+    <modules>
+        <module>system</module>
+        <module>workflow</module>
+        <module>common</module>
+        <module>gateway</module>
+        <module>attendance</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <developers>
+        <developer>
+            <id>yj zhang</id>
+            <name>yj zhang</name>
+            <email>yjzhang@sedwt.com.cn</email>
+            <organization>Nanjing Sedwt</organization>
+            <organizationUrl>http://10.11.2.30:3000/</organizationUrl>
+        </developer>
+    </developers>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <spring.boot.version>2.4.0</spring.boot.version>
+        <mybatis.spring.version>2.2.0</mybatis.spring.version>
+        <alibaba.fastjson.version>1.2.72</alibaba.fastjson.version>
+        <fasterxml.jackson.version>2.13.0-rc1</fasterxml.jackson.version>
+        <spring.cloud.version>2020.0.0</spring.cloud.version>
+        <rocketmq.spring.version>2.2.0</rocketmq.spring.version>
+        <pagehelper.spring.version>1.3.1</pagehelper.spring.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!--spring boot家族相关依赖，子module按需引入对应的依赖，注意，type和scope必须有，否则子module不能多继承-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--Spring Cloud依赖，子module按需引入对应的依赖，本项目目前只需要gateway、k8s，后续可能会增加熔断限流-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--mybatis spring boot依赖-->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${alibaba.fastjson.version}</version>
+            </dependency>
+
+            <!--jackson 全家桶，子module按需引入jar包-->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--rocketmq spring boot-->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq.spring.version}</version>
+            </dependency>
+
+            <!--pagehelper依赖-->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper.spring.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

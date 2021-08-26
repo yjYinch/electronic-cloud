@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sedwt.workflow.mapper.MeetingMapper">
+	<select id="getFutureMeetings" resultType="com.sedwt.workflow.domain.Meeting">
+		SELECT room_number, begin_time, end_time
+		FROM wf_meeting
+		WHERE project_id != #{appraisalId} AND room_number = #{roomNumber} AND end_time >= #{beginTime}
+	</select>
+
+	<select id="selectMeetingByAppraisalId" resultType="com.sedwt.workflow.domain.Meeting">
+		SELECT *
+		FROM wf_meeting
+		WHERE project_id = #{appraisalId}
+	</select>
+
+	<delete id="deleteAppraisalMeetings">
+		DELETE FROM wf_meeting
+		WHERE project_id = #{id}
+	</delete>
+
+	<insert id="createMeeting">
+		INSERT INTO wf_meeting
+		(room_number, begin_time, end_time, status, create_by, project_id, remark)
+		VALUES
+		(#{roomNumber}, #{beginTime}, #{endTime}, 0, #{createBy}, #{projectId}, #{remark})
+	</insert>
+
+	<update id="updateMeeting">
+		UPDATE wf_meeting
+		<set>
+			<if test=" roomNumber != null and roomNumber != '' or roomNumber == 0">
+				room_number = #{roomNumber},
+			</if>
+			<if test=" beginTime != null and beginTime != '' ">
+				begin_time = #{beginTime},
+			</if>
+			<if test=" endTime != null and endTime != '' ">
+				end_time = #{endTime},
+			</if>
+			<if test=" remark != null and remark != '' ">
+				remark = #{remark},
+			</if>
+		</set>
+		WHERE meeting_id = #{meetingId}
+	</update>
+</mapper>

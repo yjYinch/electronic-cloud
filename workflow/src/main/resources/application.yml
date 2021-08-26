@@ -1,0 +1,23 @@
+server:
+  port: 8002
+spring:
+  application:
+    name: workflow
+  profiles:
+    active: dev
+  #-------------邮箱配置，不要修改！！！---------------
+  mail:
+    host: smtphz.qiye.163.com
+    username: njrd@sedwt.com.cn
+    password: Administrator@13
+    port: 25
+#------------------mybatis配置，不要修改！！！----------------------
+mybatis:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  #type-aliases-package: com.sedwt
+logging:
+  level:
+    com.sedwt.workflow.mapper: debug

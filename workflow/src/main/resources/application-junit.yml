@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    username: root
+    password: sangda@123
+    url: jdbc:mysql://localhost:3306/sedwt-cloud?useUnicode=true&characterEncoding=utf8&&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari: #mysql连接池配置
+      minimum-idle: 5          #最小空闲连接数
+      maximum-pool-size: 10    #池中最大连接数
+      idle-timeout: 60000      #连接存活时间，60s
+      pool-name: HikariPool-1- #连接池的用户定义名称
+      auto-commit: true
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    lettuce:
+      pool:
+        max-wait: 3000
+        min-idle: 8
+        max-idle: 16
+        max-active: 16
+#------------------rocketmq-------------------
+rocketmq:
+  name-server: 10.11.2.30:9876
+  producer:
+    group: mail_group
+mq:
+  group: mail_group
+  topic: mail_topic
+
+#--------------------- ip port ----------------------------
+ip:
+  addr: 10.11.2.30:80 # web前端指向路径端口
+
